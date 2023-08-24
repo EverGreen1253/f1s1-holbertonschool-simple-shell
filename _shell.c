@@ -13,7 +13,7 @@
  */
 int main(void)
 {
-	int count = 0;
+	int count = 0, tty;
 	size_t input;
 	size_t bufsize = 65535;
 	char **argv = NULL;
@@ -22,7 +22,12 @@ int main(void)
 
 	while(1)
 	{
-		printf("$ ");
+		tty = isatty(STDIN_FILENO);
+		if (tty != 0)
+		{
+			printf("$ ");
+		}
+		
 		if ((input = getline(&buffer, &bufsize, stdin)) > 65535)
 		{
 			buffer[strlen(buffer) - 1] = '\0';
