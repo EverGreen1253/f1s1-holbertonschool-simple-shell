@@ -23,6 +23,22 @@ void handle_sigint(int signum)
 }
 
 /**
+ * handle_sigsegv - handle segmentation fault
+ *
+ * Return: nothing
+ */
+void handle_sigsegv(int signum)
+{
+	if (signum > 0)
+	{
+		free(buffer);
+	}
+
+	signal(signum, SIG_DFL);
+	kill(getppid(), signum);
+}
+
+/**
  * main - simple shell! The big one!
  *
  * Return: Always 0.
@@ -36,7 +52,10 @@ int main(void)
 	pid_t pid;
 	
 	buffer = malloc(bufsize + 1);
+
 	signal(SIGINT, handle_sigint);
+	signal(SIGSEGV, handle_sigsegv);
+
 	while(1)
 	{
 		tty = isatty(STDIN_FILENO);
