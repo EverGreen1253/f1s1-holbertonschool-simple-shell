@@ -15,33 +15,19 @@ int main(void)
 {
 	int count = 0;
 	size_t input;
+	size_t bufsize = 65535;
 	char **argv = NULL;
 	pid_t pid;
-	char buffer[65535];
+	char *buffer;
 
 	while(1)
 	{
-		fprintf(stdout, "$ ");
-		fflush( stdout );
-
-		input = read(0, buffer, 65534);
-		if (buffer[input - 1] == '\n')
-		{
-			/* printf("av[0] - %s\n", av[0]); */
-		}
-		else
-		{
-			/* echo input is here */
-			exit(98);
-		}
-
-		/*
-		if ((typed = getline(&buffer, &bufsize, stdin)) > 65535)
+		printf("$ ");
+		if ((input = getline(&buffer, &bufsize, stdin)) > 65535)
 		{
 			buffer[strlen(buffer) - 1] = '\0';
 			exit(EXIT_FAILURE);
 		}
-		*/
 
 		/* printf("buffer - %s\n", buffer); */
 
@@ -63,7 +49,7 @@ int main(void)
 		}
 		wait(NULL);
 	}
-	/* free(buffer); */
+	free(buffer);
 
 	return (0);
 }
