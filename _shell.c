@@ -13,42 +13,45 @@
  */
 int main(void)
 {
-	int i = 0, j = 0, count = 0;
-	char *buffer = NULL, *token, *temp = NULL, *cmd;
+	int count = 0;
+	char *buffer = NULL;
 	size_t bufsize = 65535;
 	size_t typed;
 	char **argv = NULL;
+	pid_t pid;
 
 	while (1)
 	{
 		printf("$ ");
+
 		typed = getline(&buffer, &bufsize, stdin);
-		if (typed == -1)
+		/* set a super large number in case -1 is returned */
+		/* -1 will wrap around to the max unsigned long value */
+		if (typed > 65535)
 		{
 			exit(0);
 		}
 
-		// printf("%zu characters were read.\n", typed);
+		/* printf("%zu characters were read.\n", typed); */
 
 		count = count_cmd_line_params(buffer);
 		argv = populate_argv_array(count, buffer);
 
-		pid_t pid = fork();
+		pid = fork();
 		if (pid < 0)
 		{
-			// handle error
+			/* handle error */
 			exit(EXIT_FAILURE);
 		}
 		else if (pid == 0)
 		{
 			execvp(argv[0], argv);
-			// if execvp returns, there was an error
+			/* if execvp returns, there was an error */
 			perror("execvp");
 			exit(EXIT_FAILURE);
 		}
 
 		wait(NULL);
-		j++;
 	}
 	free(buffer);
 
@@ -77,8 +80,8 @@ int count_cmd_line_params(char *buffer)
 	}
 	free(temp);
 
-	//printf("You typed: %s\n",buffer);
-	//printf("count - %d\n", count);
+	/* printf("You typed: %s\n",buffer); */
+	/* printf("count - %d\n", count); */
 
 	return count;
 }
@@ -89,7 +92,7 @@ char **populate_argv_array(int count, char *buffer)
 	char *temp, *token;
 	int i = 0;
 
-	// let's load up the argv array
+	/* let's load up the argv array */
 	argv = malloc(sizeof(char *) * count + 1);
 	if (argv == NULL)
 	{
@@ -107,7 +110,7 @@ char **populate_argv_array(int count, char *buffer)
 			exit(98);
 		}
 
-		// change the newline into a null character
+		/* change the newline into a null character */
 		strcpy(temp, token);
 		temp[strcspn(temp, "\n")] = '\0';
 		argv[i] =  temp;
