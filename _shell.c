@@ -31,7 +31,7 @@ int main(void)
 		if ((input = getline(&buffer, &bufsize, stdin)) > 65535)
 		{
 			buffer[strlen(buffer) - 1] = '\0';
-			exit(EXIT_FAILURE);
+			exit(EXIT_SUCCESS);
 		}
 
 		/* printf("buffer - %s\n", buffer); */
