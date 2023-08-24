@@ -5,6 +5,22 @@
 #include <sys/wait.h>
 #include "main.h"
 
+char *buffer;
+
+/**
+ * handle_sigint - to free memory when the program is killed
+ *
+ * Return: nothing
+ */
+void handle_sigint(int signum)
+{
+	if (signum > 0)
+	{
+		free(buffer);
+	}
+
+	exit(EXIT_SUCCESS);
+}
 
 /**
  * main - simple shell! The big one!
@@ -18,8 +34,9 @@ int main(void)
 	size_t bufsize = 4096;
 	char **argv = NULL;
 	pid_t pid;
-	char *buffer;
 	
+	buffer = malloc(bufsize + 1);
+	signal(SIGINT, handle_sigint);
 	while(1)
 	{
 		tty = isatty(STDIN_FILENO);
@@ -28,13 +45,10 @@ int main(void)
 			printf("$ ");
 		}
 
-		buffer = malloc(bufsize + 1);
-
 		input = getline(&buffer, &bufsize, stdin);
 		if (input > bufsize)
 		{
 			exit(EXIT_SUCCESS);
-			free(buffer);
 		}
 
 		/* printf("buffer - %s\n", buffer); */
