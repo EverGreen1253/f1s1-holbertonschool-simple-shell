@@ -28,6 +28,8 @@ int main(void)
 			printf("$ ");
 		}
 
+		buffer = malloc(bufsize + 1);
+
 		input = getline(&buffer, &bufsize, stdin);
 		if (input > bufsize)
 		{
@@ -38,6 +40,7 @@ int main(void)
 
 		count = count_cmd_line_params(buffer);
 		argv = populate_argv_array(count, buffer);
+		free(buffer);
 
 		pid = fork();
 
