@@ -19,7 +19,7 @@ void handle_sigint(int signum)
 		free(buffer);
 	}
 
-	exit(EXIT_SUCCESS);
+	abort();
 }
 
 /**
