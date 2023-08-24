@@ -14,25 +14,36 @@
 int main(void)
 {
 	int count = 0;
-	char *buffer = NULL;
-	size_t bufsize = 65535;
-	size_t typed;
+	size_t input;
 	char **argv = NULL;
 	pid_t pid;
+	char buffer[65535];
 
-	while (1)
+	while(1)
 	{
-		printf("$ ");
+		fprintf(stdout, "$ ");
+		fflush( stdout );
 
-		typed = getline(&buffer, &bufsize, stdin);
-		/* set a super large number in case -1 is returned */
-		/* -1 will wrap around to the max unsigned long value */
-		if (typed > 65535)
+		input = read(0, buffer, 65534);
+		if (buffer[input - 1] == '\n')
 		{
-			exit(0);
+			/* printf("av[0] - %s\n", av[0]); */
+		}
+		else
+		{
+			/* echo input is here */
+			exit(98);
 		}
 
-		/* printf("%zu characters were read.\n", typed); */
+		/*
+		if ((typed = getline(&buffer, &bufsize, stdin)) > 65535)
+		{
+			buffer[strlen(buffer) - 1] = '\0';
+			exit(EXIT_FAILURE);
+		}
+		*/
+
+		/* printf("buffer - %s\n", buffer); */
 
 		count = count_cmd_line_params(buffer);
 		argv = populate_argv_array(count, buffer);
@@ -43,17 +54,16 @@ int main(void)
 			/* handle error */
 			exit(EXIT_FAILURE);
 		}
-		else if (pid == 0)
+		else if (pid == 0)		
 		{
 			execvp(argv[0], argv);
 			/* if execvp returns, there was an error */
 			perror("execvp");
 			exit(EXIT_FAILURE);
 		}
-
 		wait(NULL);
 	}
-	free(buffer);
+	/* free(buffer); */
 
 	return (0);
 }
