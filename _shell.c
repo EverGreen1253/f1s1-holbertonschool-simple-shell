@@ -18,24 +18,7 @@ void handle_sigint(int signum)
 	{
 		free(buffer);
 	}
-
-	kill(getppid(),SIGUSR1);
-}
-
-/**
- * handle_sigsegv - handle segmentation fault
- *
- * Return: nothing
- */
-void handle_sigsegv(int signum)
-{
-	if (signum > 0)
-	{
-		free(buffer);
-	}
-
-	signal(signum, SIG_DFL);
-	kill(getppid(), signum);
+	exit(EXIT_SUCCESS);
 }
 
 /**
@@ -54,7 +37,6 @@ int main(void)
 	buffer = malloc(bufsize + 1);
 
 	signal(SIGINT, handle_sigint);
-	signal(SIGSEGV, handle_sigsegv);
 
 	while(1)
 	{
