@@ -18,7 +18,7 @@ int main(void)
 	size_t bufsize = 4096;
 	char **argv = NULL;
 	pid_t pid;
-	char *buftemp, *buffer;
+	char *buffer;
 	
 	while(1)
 	{
@@ -28,17 +28,9 @@ int main(void)
 			printf("$ ");
 		}
 
-		input = getline(&buftemp, &bufsize, stdin);
-		buffer = malloc(strlen(buftemp) + 1);
-		if (buffer == NULL)
-		{
-			exit(98);
-		}
-		strcpy(buffer, buftemp);
-
+		input = getline(&buffer, &bufsize, stdin);
 		if (input > bufsize)
 		{
-			free(buffer);
 			exit(EXIT_SUCCESS);
 		}
 
@@ -46,7 +38,6 @@ int main(void)
 
 		count = count_cmd_line_params(buffer);
 		argv = populate_argv_array(count, buffer);
-		free(buffer);
 
 		pid = fork();
 
