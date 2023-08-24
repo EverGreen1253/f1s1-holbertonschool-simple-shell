@@ -13,13 +13,13 @@
  */
 int main(void)
 {
-	int count = 0, tty;
-	size_t input;
-	size_t bufsize = 65535;
+	int count = 0, tty = 1, i = 0;
+	size_t input = 0;
+	size_t bufsize = 4096;
 	char **argv = NULL;
 	pid_t pid;
-	char *buffer;
-
+	char *buftemp, *buffer;
+	
 	while(1)
 	{
 		tty = isatty(STDIN_FILENO);
@@ -27,10 +27,19 @@ int main(void)
 		{
 			printf("$ ");
 		}
-		
-		if ((input = getline(&buffer, &bufsize, stdin)) > 65535)
+
+		input = getline(&buftemp, &bufsize, stdin);
+		buffer = malloc(strlen(buftemp) + 1);
+		if (buffer == NULL)
 		{
-			buffer[strlen(buffer) - 1] = '\0';
+			exit(98);
+		}
+		strcpy(buffer, buftemp);
+		free(buftemp);
+
+		if (input > bufsize)
+		{
+			free(buffer);
 			exit(EXIT_SUCCESS);
 		}
 
@@ -38,23 +47,35 @@ int main(void)
 
 		count = count_cmd_line_params(buffer);
 		argv = populate_argv_array(count, buffer);
+		free(buffer);
 
 		pid = fork();
+
+		/* printf("pid is - %d\n", pid); */
+
 		if (pid < 0)
 		{
 			/* handle error */
 			exit(EXIT_FAILURE);
 		}
-		else if (pid == 0)		
+		else if (pid == 0)
 		{
 			execvp(argv[0], argv);
 			/* if execvp returns, there was an error */
 			perror("execvp");
 			exit(EXIT_FAILURE);
 		}
+
+		i = 0;
+		while(argv[i] != NULL)
+		{
+			free(argv[i]);
+			i++;
+		}
+		free(argv);
+
 		wait(NULL);
 	}
-	free(buffer);
 
 	return (0);
 }
@@ -94,7 +115,7 @@ char **populate_argv_array(int count, char *buffer)
 	int i = 0;
 
 	/* let's load up the argv array */
-	argv = malloc(sizeof(char *) * count + 1);
+	argv = malloc(sizeof(char *) * (count + 1));
 	if (argv == NULL)
 	{
 		free(argv);
