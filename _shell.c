@@ -34,6 +34,7 @@ int main(void)
 		if (input > bufsize)
 		{
 			exit(EXIT_SUCCESS);
+			free(buffer);
 		}
 
 		/* printf("buffer - %s\n", buffer); */
