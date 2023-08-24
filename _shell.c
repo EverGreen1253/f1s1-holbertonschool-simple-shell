@@ -68,7 +68,7 @@ int main(int ac, char **av)
 
 		count = count_cmd_line_params(buffer);
 		argv = populate_argv_array(count, buffer);
-		// free(buffer);
+		/* free(buffer); */
 
 		pid = fork();
 
