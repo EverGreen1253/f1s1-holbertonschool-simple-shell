@@ -26,25 +26,37 @@ void handle_sigint(int signum)
  *
  * Return: Always 0.
  */
-int main(void)
+int main(int ac, char **av)
 {
 	int count = 0, tty = 1, i = 0;
 	size_t input = 0;
 	size_t bufsize = 4096;
 	char **argv = NULL;
 	pid_t pid;
-	
+
 	buffer = malloc(bufsize + 1);
 
 	signal(SIGINT, handle_sigint);
+	tty = isatty(STDIN_FILENO);
 
-	while(1)
+	/* handle the echo */
+	if (tty == 0 && ac == 1)
 	{
-		tty = isatty(STDIN_FILENO);
-		if (tty != 0)
+		printf("printing echo input:\n");
+
+		i = 0;
+		while (av[i])
 		{
-			printf("$ ");
+			printf(" - %s\n", av[i]);
+			i++;
 		}
+		exit(EXIT_SUCCESS);
+	}
+
+	/* handle user input */
+	while(tty)
+	{
+		printf("$ ");
 
 		input = getline(&buffer, &bufsize, stdin);
 		if (input > bufsize)
@@ -56,7 +68,7 @@ int main(void)
 
 		count = count_cmd_line_params(buffer);
 		argv = populate_argv_array(count, buffer);
-		free(buffer);
+		// free(buffer);
 
 		pid = fork();
 
@@ -85,6 +97,7 @@ int main(void)
 
 		wait(NULL);
 	}
+	free(buffer);
 
 	return (0);
 }
