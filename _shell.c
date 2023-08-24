@@ -35,7 +35,6 @@ int main(void)
 			exit(98);
 		}
 		strcpy(buffer, buftemp);
-		free(buftemp);
 
 		if (input > bufsize)
 		{
