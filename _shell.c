@@ -190,7 +190,7 @@ char **populate_argv_array(int count, char *buffer)
 			exit(98);
 		}
 
-		printf("token - %s\n", token);
+		/* printf("token - %s\n", token); */
 
 		/* change the newline into a null character */
 		strcpy(temp, token);
