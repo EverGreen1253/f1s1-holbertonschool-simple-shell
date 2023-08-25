@@ -86,6 +86,7 @@ int main(void)
 			i++;
 		}
 		free(argv);
+		free(buffer);
 
 		return(0);
 	}
