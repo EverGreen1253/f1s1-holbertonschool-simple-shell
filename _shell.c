@@ -64,6 +64,14 @@ int main(void)
 				exit(EXIT_FAILURE);
 			}
 
+			i = 0;
+			while(argv[i] != NULL)
+			{
+				free(argv[i]);
+				i++;
+			}
+			free(argv);
+
 			wait(NULL);
 		}
 	}
