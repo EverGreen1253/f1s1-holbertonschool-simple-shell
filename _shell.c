@@ -42,19 +42,13 @@ int main(void)
 	/* handle the echo */
 	if (tty == 0)
 	{
-		input = getline(&buffer, &bufsize, stdin);
-		if (input > bufsize)
+		while ((input = getline(&buffer, &bufsize, stdin)) < bufsize)
 		{
-			free(buffer);
-			exit(EXIT_SUCCESS);
-		}
+			/* printf("Retrieved line of length %lu :\n", input); */
+			/* printf("%s", buffer); */
 
-		count = count_cmd_line_params(buffer);
-		argv = populate_argv_array(count, buffer);
+			argv = populate_argv_array(1, buffer);
 
-		i = count;
-		while (i > 0)
-		{
 			pid = fork();
 			if (pid < 0)
 			{
@@ -62,33 +56,16 @@ int main(void)
 			}
 			else if (pid == 0)
 			{
-				/* printf("execute - %s\n", argv[count - i]); */
-				execvp(argv[count - i], argv);
+				/* printf("execute - %s\n", argv[i]); */
+				execvp(argv[0], argv);
+
 				/* if execvp returns, there was an error */
 				perror("execvp");
 				exit(EXIT_FAILURE);
 			}
 
-			i = i - 1;
-		}
-
-		i = count;
-		while (i > 0)
-		{
 			wait(NULL);
-			i = i - 1;
 		}
-
-		i = 0;
-		while(argv[i] != NULL)
-		{
-			free(argv[i]);
-			i++;
-		}
-		free(argv);
-		free(buffer);
-
-		return(0);
 	}
 
 	/* handle user input */
@@ -134,8 +111,8 @@ int main(void)
 
 		wait(NULL);
 	}
+	
 	free(buffer);
-
 	return (0);
 }
 
