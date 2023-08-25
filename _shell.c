@@ -40,33 +40,60 @@ int main(void)
 	tty = isatty(STDIN_FILENO);
 
 	/* handle the echo */
-	/*
-	if (tty == 0 && ac == 1)
+	if (tty == 0)
 	{
 		input = getline(&buffer, &bufsize, stdin);
-		printf("input - %lu", input);
+		if (input > bufsize)
+		{
+			free(buffer);
+			exit(EXIT_SUCCESS);
+		}
 
 		count = count_cmd_line_params(buffer);
 		argv = populate_argv_array(count, buffer);
 
+		i = count;
+		while (i > 0)
+		{
+			pid = fork();
+			if (pid < 0)
+			{
+				exit(EXIT_FAILURE);
+			}
+			else if (pid == 0)
+			{
+				// printf("execute - %s\n", argv[count - i]);
+				execvp(argv[count - i], argv);
+				/* if execvp returns, there was an error */
+				perror("execvp");
+				exit(EXIT_FAILURE);
+			}
+
+			i = i - 1;
+		}
+
+		i = count;
+		while (i > 0)
+		{
+			wait(NULL);
+			i = i - 1;
+		}
+
 		i = 0;
-		while (i < count){
-			printf("%d", i);
+		while(argv[i] != NULL)
+		{
+			free(argv[i]);
 			i++;
 		}
+		free(argv);
 
-		exit(EXIT_SUCCESS);
+		return(0);
 	}
-	*/
 
 	/* handle user input */
-	while(1)
+	while(tty)
 	{
-		
-		if (tty != 0)
-		{
-			printf("$ ");
-		}
+		printf("$ ");
 
 		input = getline(&buffer, &bufsize, stdin);
 		if (input > bufsize)
@@ -78,7 +105,6 @@ int main(void)
 
 		count = count_cmd_line_params(buffer);
 		argv = populate_argv_array(count, buffer);
-		/* free(buffer); */
 
 		pid = fork();
 
@@ -163,6 +189,8 @@ char **populate_argv_array(int count, char *buffer)
 			free(temp);
 			exit(98);
 		}
+
+		printf("token - %s\n", token);
 
 		/* change the newline into a null character */
 		strcpy(temp, token);
