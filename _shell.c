@@ -40,23 +40,33 @@ int main(int ac, char **av)
 	tty = isatty(STDIN_FILENO);
 
 	/* handle the echo */
+	/*
 	if (tty == 0 && ac == 1)
 	{
-		printf("printing echo input:\n");
+		input = getline(&buffer, &bufsize, stdin);
+		printf("input - %lu", input);
+
+		count = count_cmd_line_params(buffer);
+		argv = populate_argv_array(count, buffer);
 
 		i = 0;
-		while (av[i])
-		{
-			printf(" - %s\n", av[i]);
+		while (i < count){
+			printf("%d", i);
 			i++;
 		}
+
 		exit(EXIT_SUCCESS);
 	}
+	*/
 
 	/* handle user input */
-	while(tty)
+	while(1)
 	{
-		printf("$ ");
+		
+		if (tty != 0)
+		{
+			printf("$ ");
+		}
 
 		input = getline(&buffer, &bufsize, stdin);
 		if (input > bufsize)
