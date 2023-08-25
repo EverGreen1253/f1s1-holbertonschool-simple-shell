@@ -26,7 +26,7 @@ void handle_sigint(int signum)
  *
  * Return: Always 0.
  */
-int main(int ac, char **av)
+int main(void)
 {
 	int count = 0, tty = 1, i = 0;
 	size_t input = 0;
