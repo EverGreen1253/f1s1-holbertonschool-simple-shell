@@ -62,7 +62,7 @@ int main(void)
 			}
 			else if (pid == 0)
 			{
-				// printf("execute - %s\n", argv[count - i]);
+				/* printf("execute - %s\n", argv[count - i]); */
 				execvp(argv[count - i], argv);
 				/* if execvp returns, there was an error */
 				perror("execvp");
