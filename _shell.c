@@ -32,7 +32,7 @@ int main(void)
 	size_t input = 0;
 	size_t bufsize = 4096;
 	char **argv = NULL;
-	char *buftrimmed = NULL;
+	/* char *buftrimmed = NULL;*/
 	pid_t pid;
 
 	buffer = malloc(bufsize + 1);
