@@ -184,7 +184,7 @@ char **populate_argv_array(int count, char *buffer)
 
 		if (strlen(temp) != 0)
 		{
-			printf("temp - '%s'\n", temp);
+			/* printf("temp - '%s'\n", temp); */
 			argv[i] =  temp;
 
 			i = i + 1;
