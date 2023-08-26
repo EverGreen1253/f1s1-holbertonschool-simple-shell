@@ -189,6 +189,10 @@ char **populate_argv_array(int count, char *buffer)
 
 			i = i + 1;
 		}
+		else
+		{
+			free(temp);
+		}
 		token = strtok(NULL, " ");
 	}
 	argv[i] = NULL;
