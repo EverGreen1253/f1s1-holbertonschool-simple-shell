@@ -47,7 +47,8 @@ int main(void)
 			/* printf("Retrieved line of length %lu :\n", input); */
 			/* printf("%s", buffer); */
 
-			argv = populate_argv_array(1, buffer);
+			count = count_cmd_line_params(buffer, " ");
+			argv = populate_argv_array(count, buffer, " ");
 
 			pid = fork();
 			if (pid < 0)
@@ -56,7 +57,7 @@ int main(void)
 			}
 			else if (pid == 0)
 			{
-				/* printf("execute - %s\n", argv[i]); */
+				printf("execute - %s\n", argv[0]);
 				execvp(argv[0], argv);
 
 				/* if execvp returns, there was an error */
@@ -67,10 +68,12 @@ int main(void)
 			i = 0;
 			while(argv[i] != NULL)
 			{
+				/* printf("argv[%d] - %s\n", i, argv[i]); */
 				free(argv[i]);
 				i++;
 			}
 			free(argv);
+
 
 			wait(NULL);
 		}
@@ -89,8 +92,8 @@ int main(void)
 
 		/* printf("buffer - %s\n", buffer); */
 
-		count = count_cmd_line_params(buffer);
-		argv = populate_argv_array(count, buffer);
+		count = count_cmd_line_params(buffer, " ");
+		argv = populate_argv_array(count, buffer, " ");
 
 		pid = fork();
 
@@ -103,10 +106,13 @@ int main(void)
 		}
 		else if (pid == 0)
 		{
-			execvp(argv[0], argv);
-			/* if execvp returns, there was an error */
-			perror("execvp");
-			exit(EXIT_FAILURE);
+			if (argv[0] != NULL && strlen(argv[0]) > 0)
+			{
+				execvp(argv[0], argv);
+				/* if execvp returns, there was an error */
+				perror("execvp");
+				exit(EXIT_FAILURE);
+			}
 		}
 
 		i = 0;
@@ -124,7 +130,7 @@ int main(void)
 	return (0);
 }
 
-int count_cmd_line_params(char *buffer)
+int count_cmd_line_params(char *buffer, char *delim)
 {
 	char *temp, *token;
 	int count = 0;
@@ -138,11 +144,11 @@ int count_cmd_line_params(char *buffer)
 	strcpy(temp, buffer);
 
 	/* we count how many items there are first */
-	token = strtok(temp, " ");
+	token = strtok(temp, delim);
 	while (token != NULL)
 	{
 		count++;
-		token = strtok(NULL, " ");
+		token = strtok(NULL, delim);
 	}
 	free(temp);
 
@@ -152,7 +158,7 @@ int count_cmd_line_params(char *buffer)
 	return count;
 }
 
-char **populate_argv_array(int count, char *buffer)
+char **populate_argv_array(int count, char *buffer, char *delim)
 {
 	char **argv;
 	char *temp, *token;
@@ -166,7 +172,7 @@ char **populate_argv_array(int count, char *buffer)
 		exit(98);
 	}
 
-	token = strtok(buffer, " ");
+	token = strtok(buffer, delim);
 	while (token != NULL)
 	{
 		temp = malloc(strlen(token) + 1);
@@ -180,8 +186,6 @@ char **populate_argv_array(int count, char *buffer)
 		/* change the newline into a null character */
 		temp[strcspn(temp, "\n")] = '\0';
 
-		/* temp = strtrim(temp); */
-
 		if (strlen(temp) != 0)
 		{
 			/* printf("temp - '%s'\n", temp); */
@@ -193,7 +197,8 @@ char **populate_argv_array(int count, char *buffer)
 		{
 			free(temp);
 		}
-		token = strtok(NULL, " ");
+
+		token = strtok(NULL, delim);
 	}
 	argv[i] = NULL;
 
