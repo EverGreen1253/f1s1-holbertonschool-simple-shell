@@ -225,7 +225,7 @@ char *strtrim(char *buffer)
 	int startpos = 0, endpos = 0, i, j, stop;
 	char *temp, *trimmed;
 
-	temp = malloc(len);
+	temp = malloc(len + 1);
 	strcpy(temp, buffer);
 	temp[strcspn(temp, "\n")] = '\0';
 
