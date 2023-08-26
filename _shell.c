@@ -120,6 +120,7 @@ int main(void)
 		{
 			if (argv[0] != NULL && strlen(argv[0]) > 0)
 			{
+				strtrim(&argv[0]);
 				execvp(argv[0], argv);
 				/* if execvp returns, there was an error */
 				perror("execvp");
@@ -217,14 +218,14 @@ char **populate_argv_array(int count, char *buffer, char *delim)
 	return argv;
 }
 
-char *strtrim(char *s)
+void strtrim(char **s)
 {
-	unsigned long len = strlen(s), newlen;
+	unsigned long len = strlen(*s), newlen;
 	int startpos = 0, endpos = 0, i, j, stop;
 	char *temp, *trimmed;
 
 	temp = malloc(len);
-	strcpy(temp, s);
+	strcpy(temp, *s);
 	temp[strcspn(temp, "\n")] = '\0';
 
 	i = 0;
@@ -244,7 +245,7 @@ char *strtrim(char *s)
 	{
 		/* entire string is spaces */
 		free(temp);
-		return NULL;
+		*s = NULL;
 	}
 
 	i = (int)len;
@@ -259,6 +260,7 @@ char *strtrim(char *s)
 		i--;
 	}
 	endpos = i + 1;
+	free(temp);
 
 	/* printf("len - %lu, startpos - %d, endpos - %d\n", len, startpos, endpos); */
 
@@ -270,21 +272,20 @@ char *strtrim(char *s)
 		trimmed = malloc(newlen + 1);
 		i = 0;
 		j = 0;
-		while (s[j] != '\0')
+		while (*s[j] != '\0')
 		{
 			if (j >= startpos && j <= endpos)
 			{
-				trimmed[i] = s[j];
+				trimmed[i] = *s[j];
 				i++;
 			}
 			j++;
 		}
+		trimmed[i] = '\0';
+		free(*s);
+		s = &trimmed;
 	}
-	trimmed[i] = '\0';
 
 	/* printf("trimmed - %s, i - %d, trimmed length - %lu\n", trimmed, i, strlen(trimmed)); */
 
-	free(temp);
-	free(s);
-	return trimmed;
 }
