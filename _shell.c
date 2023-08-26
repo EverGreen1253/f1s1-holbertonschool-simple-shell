@@ -55,7 +55,7 @@ int main(void)
 				/* printf("empty string!\n"); */
 				free(buffer);
 				free(buftrimmed);
-				exit(98);
+				exit(0);
 			}
 
 			count = count_cmd_line_params(buftrimmed, " ");
@@ -222,7 +222,7 @@ char *strtrim(char *s)
 	int startpos = 0, endpos = 0, i, j, stop;
 	char *temp, *trimmed;
 
-	temp = malloc(len);
+	temp = malloc(len + 1);
 	strcpy(temp, s);
 	temp[strcspn(temp, "\n")] = '\0';
 
