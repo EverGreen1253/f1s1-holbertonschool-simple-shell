@@ -51,45 +51,41 @@ int main(void)
 			/* clean up the buffer input and remove whitespace */
 			
 			trimmed = strtrim(buffer);
-			if (trimmed == NULL)
+			if (trimmed != NULL)
 			{
-				free(buffer);
-				free(trimmed);
-				exit(0);
+				strcpy(buffer, trimmed);
+
+				count = count_cmd_line_params(buffer, " ");
+				argv = populate_argv_array(count, buffer, " ");
+
+				pid = fork();
+				if (pid < 0)
+				{
+					exit(EXIT_FAILURE);
+				}
+				else if (pid == 0)
+				{
+					/* printf("execute - %s\n", argv[0]); */
+					execvp(argv[0], argv);
+
+					/* if execvp returns, there was an error */
+					perror("execvp");
+					exit(EXIT_FAILURE);
+				}
+
+				i = 0;
+				while(argv[i] != NULL)
+				{
+					/* printf("argv[%d] - %s\n", i, argv[i]); */
+					free(argv[i]);
+					i++;
+				}
+				free(argv);
+
+				wait(NULL);
 			}
 
-			strcpy(buffer, trimmed);
 			free(trimmed);
-
-			count = count_cmd_line_params(buffer, " ");
-			argv = populate_argv_array(count, buffer, " ");
-
-			pid = fork();
-			if (pid < 0)
-			{
-				exit(EXIT_FAILURE);
-			}
-			else if (pid == 0)
-			{
-				/* printf("execute - %s\n", argv[0]); */
-				execvp(argv[0], argv);
-
-				/* if execvp returns, there was an error */
-				perror("execvp");
-				exit(EXIT_FAILURE);
-			}
-
-			i = 0;
-			while(argv[i] != NULL)
-			{
-				/* printf("argv[%d] - %s\n", i, argv[i]); */
-				free(argv[i]);
-				i++;
-			}
-			free(argv);
-
-
-			wait(NULL);
 		}
 	}
 
