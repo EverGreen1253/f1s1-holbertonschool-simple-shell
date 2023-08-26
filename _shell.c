@@ -284,5 +284,6 @@ char *strtrim(char *s)
 	/* printf("trimmed - %s, i - %d, trimmed length - %lu\n", trimmed, i, strlen(trimmed)); */
 
 	free(temp);
+	free(s);
 	return trimmed;
 }
