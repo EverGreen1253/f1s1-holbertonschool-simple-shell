@@ -6,6 +6,7 @@
 #include "main.h"
 
 char *buffer;
+char *trimmed;
 
 /**
  * handle_sigint - to free memory when the program is killed
@@ -32,7 +33,6 @@ int main(void)
 	size_t input = 0;
 	size_t bufsize = 4096;
 	char **argv = NULL;
-	/* char *buftrimmed = NULL;*/
 	pid_t pid;
 
 	buffer = malloc(bufsize + 1);
@@ -49,15 +49,17 @@ int main(void)
 			/* printf("%s", buffer); */
 
 			/* clean up the buffer input and remove whitespace */
-			/*
-			buftrimmed = strtrim(buffer);
-			if (buftrimmed == NULL)
+			
+			trimmed = strtrim(buffer);
+			if (trimmed == NULL)
 			{
 				free(buffer);
-				free(buftrimmed);
+				free(trimmed);
 				exit(0);
 			}
-			*/
+
+			strcpy(buffer, trimmed);
+			free(trimmed);
 
 			count = count_cmd_line_params(buffer, " ");
 			argv = populate_argv_array(count, buffer, " ");
@@ -120,7 +122,6 @@ int main(void)
 		{
 			if (argv[0] != NULL && strlen(argv[0]) > 0)
 			{
-				strtrim(&argv[0]);
 				execvp(argv[0], argv);
 				/* if execvp returns, there was an error */
 				perror("execvp");
@@ -218,14 +219,14 @@ char **populate_argv_array(int count, char *buffer, char *delim)
 	return argv;
 }
 
-void strtrim(char **s)
+char *strtrim(char *buffer)
 {
-	unsigned long len = strlen(*s), newlen;
+	unsigned long len = strlen(buffer), newlen;
 	int startpos = 0, endpos = 0, i, j, stop;
 	char *temp, *trimmed;
 
 	temp = malloc(len);
-	strcpy(temp, *s);
+	strcpy(temp, buffer);
 	temp[strcspn(temp, "\n")] = '\0';
 
 	i = 0;
@@ -245,7 +246,7 @@ void strtrim(char **s)
 	{
 		/* entire string is spaces */
 		free(temp);
-		*s = NULL;
+		return NULL;
 	}
 
 	i = (int)len;
@@ -260,7 +261,6 @@ void strtrim(char **s)
 		i--;
 	}
 	endpos = i + 1;
-	free(temp);
 
 	/* printf("len - %lu, startpos - %d, endpos - %d\n", len, startpos, endpos); */
 
@@ -272,20 +272,22 @@ void strtrim(char **s)
 		trimmed = malloc(newlen + 1);
 		i = 0;
 		j = 0;
-		while (*s[j] != '\0')
+		while (temp[j] != '\0')
 		{
 			if (j >= startpos && j <= endpos)
 			{
-				trimmed[i] = *s[j];
+				trimmed[i] = temp[j];
 				i++;
 			}
 			j++;
 		}
 		trimmed[i] = '\0';
-		free(*s);
-		s = &trimmed;
+
+		/* printf("trimmed - %s, i - %d, trimmed length - %lu\n", trimmed, i, strlen(trimmed)); */
+
+		free(temp);
+		return trimmed;
 	}
-
-	/* printf("trimmed - %s, i - %d, trimmed length - %lu\n", trimmed, i, strlen(trimmed)); */
-
+	free(temp);
+	return NULL;
 }
