@@ -49,17 +49,18 @@ int main(void)
 			/* printf("%s", buffer); */
 
 			/* clean up the buffer input and remove whitespace */
+			/*
 			buftrimmed = strtrim(buffer);
 			if (buftrimmed == NULL)
 			{
-				/* printf("empty string!\n"); */
 				free(buffer);
 				free(buftrimmed);
 				exit(0);
 			}
+			*/
 
-			count = count_cmd_line_params(buftrimmed, " ");
-			argv = populate_argv_array(count, buftrimmed, " ");
+			count = count_cmd_line_params(buffer, " ");
+			argv = populate_argv_array(count, buffer, " ");
 
 			pid = fork();
 			if (pid < 0)
