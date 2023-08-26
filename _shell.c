@@ -176,19 +176,23 @@ char **populate_argv_array(int count, char *buffer)
 			exit(98);
 		}
 
-		/* printf("token - %s\n", token); */
-
-		/* change the newline into a null character */
 		strcpy(temp, token);
+		/* change the newline into a null character */
 		temp[strcspn(temp, "\n")] = '\0';
-		argv[i] =  temp;
 
+		/* temp = strtrim(temp); */
+
+		if (strlen(temp) != 0)
+		{
+			printf("temp - '%s'\n", temp);
+			argv[i] =  temp;
+
+			i = i + 1;
+		}
 		token = strtok(NULL, " ");
-		i = i + 1;
 	}
 	argv[i] = NULL;
 
 	return argv;
 }
-
 
