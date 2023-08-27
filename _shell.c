@@ -50,6 +50,25 @@ int main(int ac, char **av, char **env)
 		paths = _getenv(env, "PATH");
 		/* printf("path - %s\n", paths); */
 
+		if (paths == NULL || strlen(paths) == 0)
+		{
+			errmsg = malloc(strlen(av[0]) + strlen(buffer) + 18);
+
+			strcpy(errmsg, av[0]);
+			strcat(errmsg, ": ");
+			strcat(errmsg, "1");
+			strcat(errmsg, ": ");
+			strcat(errmsg, buffer);
+			strcat(errmsg, ": not found\n");
+
+			write(2, errmsg, strlen(errmsg));
+			
+			free(paths);
+			free(buffer);
+			free(errmsg);
+			exit(127);
+		}	
+
 		while ((input = getline(&buffer, &bufsize, stdin)) < bufsize)
 		{
 			/* printf("Retrieved line of length %lu :\n", input); */
@@ -69,17 +88,12 @@ int main(int ac, char **av, char **env)
 
 				/* printf("stat - %d\n", stat(cmd, &st)); */
 
-				if (paths == NULL || stat(cmd, &st) != 0)
+				if (stat(cmd, &st) != 0)
 				{
-					path_searched = 0;
-					validpath = NULL;
-					if (paths != NULL && strlen(paths) > 0)
-					{
-						validpath = _exists(paths, cmd);
-						path_searched = 1;
-					}
+					validpath = _exists(paths, cmd);
+					path_searched = 1;
 
-					if (paths == NULL || validpath == NULL)
+					if (validpath == NULL)
 					{
 						errmsg = malloc(strlen(av[0]) + strlen(buffer) + 18);
 
@@ -97,12 +111,7 @@ int main(int ac, char **av, char **env)
 							free(validpath);
 						}
 
-						if (paths != NULL)
-						{
-							free(paths);
-						}
-
-
+						free(paths);
 						free(trimmed);
 						free(buffer);
 						free(temp);
