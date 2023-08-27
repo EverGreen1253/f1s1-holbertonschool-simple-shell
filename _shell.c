@@ -63,37 +63,13 @@ int main(int ac, char **av, char **env)
 			{
 				strcpy(buffer, trimmed);
 
-				if (paths == NULL || strlen(paths) == 0)
-				{
-					errmsg = malloc(strlen(av[0]) + strlen(buffer) + 18);
-
-					strcpy(errmsg, av[0]);
-					strcat(errmsg, ": ");
-					strcat(errmsg, "1");
-					strcat(errmsg, ": ");
-					strcat(errmsg, buffer);
-					strcat(errmsg, ": not found\n");
-
-					write(2, errmsg, strlen(errmsg));
-			
-					free(paths);
-					free(buffer);
-					free(errmsg);
-					exit(127);
-				}	
-
 				/* try whatever is echoed first before checking paths  */
 				temp = malloc(strlen(buffer) + 1);
 				strcpy(temp, buffer);
 				cmd = strtok(temp, " ");
-
-				/* printf("stat - %d\n", stat(cmd, &st)); */
-
 				if (stat(cmd, &st) != 0)
 				{
 					validpath = _exists(paths, cmd);
-					path_searched = 1;
-
 					if (validpath == NULL)
 					{
 						errmsg = malloc(strlen(av[0]) + strlen(buffer) + 18);
@@ -107,12 +83,12 @@ int main(int ac, char **av, char **env)
 
 						write(2, errmsg, strlen(errmsg));
 
-						if (path_searched == 1)
+						if (paths == NULL || strlen(paths) == 0)
 						{
-							free(validpath);
+							free(paths);
 						}
 
-						free(paths);
+						free(validpath);
 						free(trimmed);
 						free(buffer);
 						free(temp);
@@ -254,6 +230,11 @@ char *_exists(char *paths, char *input)
 {
 	char *cmd, *temp = NULL, *path, *pathstemp = NULL, *final = "", *validpath = NULL;
 	struct stat st;
+
+	if (paths == NULL || strlen(paths) == 0)
+	{
+		return(NULL);
+	}
 
 	temp = malloc(strlen(input) + 1);
 	strcpy(temp, input);
