@@ -38,6 +38,7 @@ int main(int ac, char **av, char **env)
 	pid_t pid;
 	char *paths, *validpath = NULL, *errmsg = NULL, *final, *temp, *cmd;
 	struct stat st;
+	int badcmd = 0;
 
 	buffer = malloc(bufsize + 1);
 
@@ -69,7 +70,15 @@ int main(int ac, char **av, char **env)
 					free(buffer);
 					free(trimmed);
 					free(paths);
-					exit(0);
+
+					if (badcmd == 1)
+					{
+						exit(2);
+					}
+					else
+					{
+						exit(0);
+					}
 				}
 
 				if (strcmp(buffer, "env") == 0)
@@ -97,6 +106,12 @@ int main(int ac, char **av, char **env)
 				cmd = strtok(temp, " ");
 				if (paths == NULL || stat(cmd, &st) != 0)
 				{
+					/* set persistant bit */
+					if (stat(cmd, &st) != 0)
+					{
+						badcmd = 1;
+					}
+
 					path_searched = 0;
 					validpath = NULL;
 					if (paths != NULL && strlen(paths) > 0)
