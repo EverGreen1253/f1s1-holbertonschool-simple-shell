@@ -36,7 +36,7 @@ int main(int ac, char **av, char **env)
 	size_t bufsize = 4096;
 	char **argv = NULL;
 	pid_t pid;
-	char *paths, *validpath = NULL, *errmsg = NULL, *final;
+	char *paths, *validpath = NULL, *errmsg = NULL, *final, *temp, *cmd;
 	struct stat st;
 
 	buffer = malloc(bufsize + 1);
@@ -64,12 +64,15 @@ int main(int ac, char **av, char **env)
 				strcpy(buffer, trimmed);
 
 				/* try whatever is echoed first before checking paths  */
-				if (stat(buffer, &st) != 0)
+				temp = malloc(strlen(buffer) + 1);
+				strcpy(temp, buffer);
+				cmd = strtok(temp, " ");
+				if (stat(cmd, &st) != 0)
 				{
 					path_searched = 0;
 					if (paths != NULL)
 					{
-						validpath = _exists(paths, buffer);
+						validpath = _exists(paths, cmd);
 						path_searched = 1;
 					}
 
@@ -92,6 +95,7 @@ int main(int ac, char **av, char **env)
 							free(validpath);
 						}
 
+						free(temp);
 						free(errmsg);
 						exit(127);
 					}
@@ -106,6 +110,7 @@ int main(int ac, char **av, char **env)
 					free(buffer);
 					buffer = final;
 				}
+				free(temp);
 
 				/* printf("buffer - %s\n", buffer); */
 
