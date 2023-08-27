@@ -31,7 +31,7 @@ void handle_sigint(int signum)
  */
 int main(int ac, char **av, char **env)
 {
-	int count = 0, tty = 1, i = 0, path_searched = 0;
+	int count = 0, tty = 1, i = 0;
 	size_t input = 0;
 	size_t bufsize = 256;
 	char **argv = NULL;
