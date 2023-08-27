@@ -95,10 +95,10 @@ int main(int ac, char **av, char **env)
 							free(validpath);
 						}
 
-						if (stat(cmd, &st) != 0)
-						{
-							free(paths);
-						}
+						/* FIXME: do a free(paths) */
+						/* for the final task 4 check */
+						/* but need to determine the */
+						/* conditions */
 
 						free(trimmed);
 						free(buffer);
