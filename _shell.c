@@ -141,6 +141,8 @@ int main(int ac, char **av, char **env)
 
 			free(trimmed);
 		}
+
+		free(paths);
 	}
 
 	/* handle user input */
