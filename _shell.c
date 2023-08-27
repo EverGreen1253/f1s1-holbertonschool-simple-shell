@@ -47,7 +47,6 @@ int main(int ac, char **av, char **env)
 	/* handle the echo */
 	if (tty == 0 && ac == 1 && av[0] != NULL)
 	{
-		/* _setenv(env, "PATH", ""); */
 		paths = _getenv(env, "PATH");
 		/* printf("path - %s\n", paths); */
 
@@ -70,7 +69,8 @@ int main(int ac, char **av, char **env)
 				if (stat(cmd, &st) != 0)
 				{
 					path_searched = 0;
-					if (paths != NULL)
+					validpath = NULL;
+					if (strlen(paths) > 0)
 					{
 						validpath = _exists(paths, cmd);
 						path_searched = 1;
@@ -94,7 +94,6 @@ int main(int ac, char **av, char **env)
 							free(validpath);
 						}
 						
-						free(paths);
 						free(temp);
 						free(errmsg);
 						exit(127);
@@ -198,58 +197,30 @@ int main(int ac, char **av, char **env)
 	return (0);
 }
 
-void _setenv(char **env, char *myvar, char *myvalue)
-{
-	int i = 0;
-	/* extern char** environ; */
-	char *temp, *final, *token;
-
-	while (env[i] != NULL)
-	{
-		temp = malloc(strlen(env[i]) + 1);
-		strcpy(temp, env[i]);
-
-		token = strtok(temp, "=");
-		if (strcmp(token, myvar) == 0)
-		{
-			final = malloc(strlen(token) + strlen("=") +  strlen(myvalue) + 1);
-
-			strcpy(final, token);
-			strcat(final, "=");
-			strcat(final, myvalue);
-			env[i] = malloc(strlen(final) + 1);
-
-			env[i] =  final;
-
-			/* j = i; */
-		}
-		i++;
-		free(temp);
-	}
-}
-
 char *_getenv(char **env, char *name)
 {
 	int i = 0;
-	char *temp, *token, *paths = NULL;
+	char *temp, *token, *paths = "";
 
-	while (env[i] != NULL)
+	if (env != NULL)
 	{
-
-		temp = malloc(strlen(env[i]) + 1);
-		strcpy(temp, env[i]);
-
-		token = strtok(temp, "=");
-		if (strcmp(token, name) == 0)
+		while (env[i] != NULL)
 		{
-			token = strtok(NULL, "=");
-			paths = malloc(strlen(token) + 1);
-			strcpy(paths, token);
+			temp = malloc(strlen(env[i]) + 1);
+			strcpy(temp, env[i]);
+
+			token = strtok(temp, "=");
+			if (strcmp(token, name) == 0)
+			{
+				token = strtok(NULL, "=");
+				paths = malloc(strlen(token) + 1);
+				strcpy(paths, token);
+			}
+
+			i++;
+
+			free(temp);
 		}
-
-		i++;
-
-		free(temp);
 	}
 
 	return(paths);
@@ -274,6 +245,8 @@ char *_exists(char *paths, char *input)
 	path = strtok(pathstemp, ":");
 	while (path != NULL)
 	{
+		/* printf("path is %s\n", path); */
+
 		final = malloc(strlen(path) + strlen(cmd) + 2);
 
 		strcpy(final, path);
