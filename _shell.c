@@ -42,6 +42,7 @@ int main(int ac, char **av, char **env)
 
 	buffer = malloc(bufsize + 1);
 	badcmd = malloc(sizeof(int) * 1);
+	*badcmd = 0;
 
 	signal(SIGINT, handle_sigint);
 	tty = isatty(STDIN_FILENO);
