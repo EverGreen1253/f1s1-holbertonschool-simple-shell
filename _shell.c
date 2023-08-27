@@ -111,12 +111,6 @@ int main(int ac, char **av, char **env)
 				cmd = strtok(temp, " ");
 				if (paths == NULL || stat(cmd, &st) != 0)
 				{
-					/* set persistant bit */
-					if (stat(cmd, &st) != 0)
-					{
-						*badcmd = 1;
-					}
-
 					path_searched = 0;
 					validpath = NULL;
 					if (paths != NULL && strlen(paths) > 0)
@@ -183,6 +177,7 @@ int main(int ac, char **av, char **env)
 					execvp(argv[0], argv);
 
 					/* if execvp returns, there was an error */
+					*badcmd = 1;
 					perror("execvp");
 					exit(EXIT_FAILURE);
 				}
