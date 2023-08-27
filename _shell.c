@@ -138,11 +138,8 @@ int main(int ac, char **av, char **env)
 
 				wait(NULL);
 			}
-
 			free(trimmed);
 		}
-
-		free(paths);
 	}
 
 	/* handle user input */
@@ -240,6 +237,8 @@ char *_getenv(char **env, char *name)
 		if (strcmp(token, name) == 0)
 		{
 			token = strtok(NULL, "=");
+
+			free(temp);
 			return token;
 		}
 
