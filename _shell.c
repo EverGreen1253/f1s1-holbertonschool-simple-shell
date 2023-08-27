@@ -80,7 +80,6 @@ int main(int ac, char **av, char **env)
 					{
 						errmsg = malloc(strlen(av[0]) + strlen(buffer) + 17);
 
-						/* example: ./hsh: 1: ls: not found  */
 						strcpy(errmsg, av[0]);
 						strcat(errmsg, ": ");
 						strcat(errmsg, "1");
@@ -94,19 +93,19 @@ int main(int ac, char **av, char **env)
 						{
 							free(validpath);
 						}
-
+						
+						free(paths);
 						free(temp);
 						free(errmsg);
 						exit(127);
 					}
-
-					/* printf("valid path exists!\n"); */
 
 					final = malloc(strlen(validpath) + strlen(buffer) + 2);
 					strcpy(final, validpath);
 					strcat(final, "/");
 					strcat(final, buffer);
 
+					free(validpath);
 					free(buffer);
 					buffer = final;
 				}
@@ -145,6 +144,7 @@ int main(int ac, char **av, char **env)
 			}
 			free(trimmed);
 		}
+		free(paths);
 	}
 
 	/* handle user input */
@@ -231,10 +231,11 @@ void _setenv(char **env, char *myvar, char *myvalue)
 char *_getenv(char **env, char *name)
 {
 	int i = 0;
-	char *temp, *token;
+	char *temp, *token, *paths = NULL;
 
 	while (env[i] != NULL)
 	{
+
 		temp = malloc(strlen(env[i]) + 1);
 		strcpy(temp, env[i]);
 
@@ -242,16 +243,16 @@ char *_getenv(char **env, char *name)
 		if (strcmp(token, name) == 0)
 		{
 			token = strtok(NULL, "=");
-
-			free(temp);
-			return token;
+			paths = malloc(strlen(token) + 1);
+			strcpy(paths, token);
 		}
 
 		i++;
+
 		free(temp);
 	}
 
-	return NULL;
+	return(paths);
 }
 
 char *_exists(char *paths, char *input)
@@ -268,17 +269,17 @@ char *_exists(char *paths, char *input)
 
 	pathstemp = malloc(strlen(paths) + 1);
 	strcpy(pathstemp, paths);
+	strcat(pathstemp, "\0");
 
 	path = strtok(pathstemp, ":");
 	while (path != NULL)
 	{
-		/* printf("path is %s\n", path); */
-
 		final = malloc(strlen(path) + strlen(cmd) + 2);
 
 		strcpy(final, path);
 		strcat(final, "/");
 		strcat(final, cmd);
+		strcat(final, "\0");
 
 	        if (stat(final, &st) == 0)
 	        {
