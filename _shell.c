@@ -78,14 +78,14 @@ int main(int ac, char **av, char **env)
 
 					if (paths == NULL || validpath == NULL)
 					{
-						errmsg = malloc(strlen(av[0]) + strlen(buffer) + 17);
+						errmsg = malloc(strlen(av[0]) + strlen(buffer) + 18);
 
 						strcpy(errmsg, av[0]);
 						strcat(errmsg, ": ");
 						strcat(errmsg, "1");
 						strcat(errmsg, ": ");
 						strcat(errmsg, buffer);
-						strcat(errmsg, ": not found");
+						strcat(errmsg, ": not found\n");
 
 						write(2, errmsg, strlen(errmsg));
 
