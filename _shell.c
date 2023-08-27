@@ -66,7 +66,10 @@ int main(int ac, char **av, char **env)
 				temp = malloc(strlen(buffer) + 1);
 				strcpy(temp, buffer);
 				cmd = strtok(temp, " ");
-				if (stat(cmd, &st) != 0)
+
+				/* printf("stat - %d\n", stat(cmd, &st)); */
+
+				if (paths == NULL || stat(cmd, &st) != 0)
 				{
 					path_searched = 0;
 					validpath = NULL;
@@ -93,7 +96,13 @@ int main(int ac, char **av, char **env)
 						{
 							free(validpath);
 						}
-						
+
+						if (paths != NULL)
+						{
+							free(paths);
+						}
+
+
 						free(trimmed);
 						free(buffer);
 						free(temp);
