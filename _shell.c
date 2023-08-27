@@ -33,7 +33,7 @@ int main(int ac, char **av, char **env)
 {
 	int count = 0, tty = 1, i = 0, path_searched = 0;
 	size_t input = 0;
-	size_t bufsize = 4096;
+	size_t bufsize = 256;
 	char **argv = NULL;
 	pid_t pid;
 	char *paths, *validpath = NULL, *errmsg = NULL, *final, *temp, *cmd;
@@ -70,13 +70,13 @@ int main(int ac, char **av, char **env)
 				{
 					path_searched = 0;
 					validpath = NULL;
-					if (strlen(paths) > 0)
+					if (paths != NULL && strlen(paths) > 0)
 					{
 						validpath = _exists(paths, cmd);
 						path_searched = 1;
 					}
 
-					if (validpath == NULL)
+					if (paths == NULL || validpath == NULL)
 					{
 						errmsg = malloc(strlen(av[0]) + strlen(buffer) + 17);
 
@@ -85,7 +85,7 @@ int main(int ac, char **av, char **env)
 						strcat(errmsg, "1");
 						strcat(errmsg, ": ");
 						strcat(errmsg, buffer);
-						strcat(errmsg, ": not found\n");
+						strcat(errmsg, ": not found");
 
 						write(2, errmsg, strlen(errmsg));
 
@@ -94,6 +94,7 @@ int main(int ac, char **av, char **env)
 							free(validpath);
 						}
 						
+						free(buffer);
 						free(temp);
 						free(errmsg);
 						exit(127);
@@ -213,8 +214,11 @@ char *_getenv(char **env, char *name)
 			if (strcmp(token, name) == 0)
 			{
 				token = strtok(NULL, "=");
-				paths = malloc(strlen(token) + 1);
-				strcpy(paths, token);
+				if (token != NULL)
+				{
+					paths = malloc(strlen(token) + 1);
+					strcpy(paths, token);
+				}
 			}
 
 			i++;
