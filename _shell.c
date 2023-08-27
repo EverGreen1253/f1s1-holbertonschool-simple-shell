@@ -52,24 +52,6 @@ int main(int ac, char **av, char **env)
 
 		while ((input = getline(&buffer, &bufsize, stdin)) < bufsize)
 		{
-			if (paths == NULL || strlen(paths) == 0)
-			{
-				errmsg = malloc(strlen(av[0]) + strlen(buffer) + 18);
-
-				strcpy(errmsg, av[0]);
-				strcat(errmsg, ": ");
-				strcat(errmsg, "1");
-				strcat(errmsg, ": ");
-				strcat(errmsg, buffer);
-				strcat(errmsg, ": not found\n");
-
-				write(2, errmsg, strlen(errmsg));
-			
-				free(paths);
-				free(buffer);
-				free(errmsg);
-				exit(127);
-			}	
 
 			/* printf("Retrieved line of length %lu :\n", input); */
 			/* printf("%s", buffer); */
@@ -80,6 +62,25 @@ int main(int ac, char **av, char **env)
 			if (trimmed != NULL)
 			{
 				strcpy(buffer, trimmed);
+
+				if (paths == NULL || strlen(paths) == 0)
+				{
+					errmsg = malloc(strlen(av[0]) + strlen(buffer) + 18);
+
+					strcpy(errmsg, av[0]);
+					strcat(errmsg, ": ");
+					strcat(errmsg, "1");
+					strcat(errmsg, ": ");
+					strcat(errmsg, buffer);
+					strcat(errmsg, ": not found\n");
+
+					write(2, errmsg, strlen(errmsg));
+			
+					free(paths);
+					free(buffer);
+					free(errmsg);
+					exit(127);
+				}	
 
 				/* try whatever is echoed first before checking paths  */
 				temp = malloc(strlen(buffer) + 1);
