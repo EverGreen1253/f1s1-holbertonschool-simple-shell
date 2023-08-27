@@ -59,9 +59,11 @@ int main(int ac, char **av, char **env)
 			/* clean up the buffer input and remove whitespace */
 			
 			trimmed = strtrim(buffer);
+
 			if (trimmed != NULL)
 			{
 				strcpy(buffer, trimmed);
+
 
 				/* try whatever is echoed first before checking paths  */
 				temp = malloc(strlen(buffer) + 1);
@@ -163,6 +165,24 @@ int main(int ac, char **av, char **env)
 		if (input > bufsize)
 		{
 			exit(EXIT_SUCCESS);
+		}
+
+		if (strcmp(buffer, "exit") == 0)
+		{
+			free(buffer);
+			exit(0);
+		}
+
+		if (strcmp(buffer, "env") == 0)
+		{
+			i = 0;
+			while(env[i] != NULL)
+			{
+				printf("%s\n", env[i]);
+				i++;
+			}
+			free(buffer);
+			exit(0);
 		}
 
 		/* printf("buffer - %s\n", buffer); */
