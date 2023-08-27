@@ -31,7 +31,7 @@ void handle_sigint(int signum)
  */
 int main(int ac, char **av, char **env)
 {
-	int count = 0, tty = 1, i = 0;
+	int count = 0, tty = 1, i = 0, path_searched = 0;
 	size_t input = 0;
 	size_t bufsize = 256;
 	char **argv = NULL;
@@ -67,10 +67,17 @@ int main(int ac, char **av, char **env)
 				temp = malloc(strlen(buffer) + 1);
 				strcpy(temp, buffer);
 				cmd = strtok(temp, " ");
-				if (stat(cmd, &st) != 0)
+				if (paths == NULL || stat(cmd, &st) != 0)
 				{
-					validpath = _exists(paths, cmd);
-					if (validpath == NULL)
+					path_searched = 0;
+					validpath = NULL;
+					if (paths != NULL && strlen(paths) > 0)
+					{
+						validpath = _exists(paths, cmd);
+						path_searched = 1;
+					}
+
+					if (paths == NULL || validpath == NULL)
 					{
 						errmsg = malloc(strlen(av[0]) + strlen(buffer) + 18);
 
@@ -83,12 +90,16 @@ int main(int ac, char **av, char **env)
 
 						write(2, errmsg, strlen(errmsg));
 
-						if (paths == NULL || strlen(paths) == 0)
+						if (path_searched == 1)
+						{
+							free(validpath);
+						}
+
+						if (paths != NULL)
 						{
 							free(paths);
 						}
 
-						free(validpath);
 						free(trimmed);
 						free(buffer);
 						free(temp);
