@@ -95,11 +95,6 @@ int main(int ac, char **av, char **env)
 							free(validpath);
 						}
 
-						if (paths != NULL)
-						{
-							free(paths);
-						}
-
 						free(trimmed);
 						free(buffer);
 						free(temp);
