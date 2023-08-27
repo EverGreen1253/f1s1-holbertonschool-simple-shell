@@ -94,6 +94,7 @@ int main(int ac, char **av, char **env)
 							free(validpath);
 						}
 						
+						free(trimmed);
 						free(buffer);
 						free(temp);
 						free(errmsg);
