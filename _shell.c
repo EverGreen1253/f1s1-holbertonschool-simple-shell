@@ -38,11 +38,8 @@ int main(int ac, char **av, char **env)
 	pid_t pid;
 	char *paths, *validpath = NULL, *errmsg = NULL, *final, *temp, *cmd;
 	struct stat st;
-	int *badcmd;
 
 	buffer = malloc(bufsize + 1);
-	badcmd = malloc(sizeof(int) * 1);
-	*badcmd = 0;
 
 	signal(SIGINT, handle_sigint);
 	tty = isatty(STDIN_FILENO);
@@ -73,16 +70,7 @@ int main(int ac, char **av, char **env)
 					free(trimmed);
 					free(paths);
 
-					if (*badcmd == 1)
-					{
-						free(badcmd);
-						exit(2);
-					}
-					else
-					{
-						free(badcmd);
-						exit(0);
-					}
+					exit(0);
 				}
 
 				if (strcmp(buffer, "env") == 0)
@@ -99,7 +87,6 @@ int main(int ac, char **av, char **env)
 						free(paths);
 					}
 
-					free(badcmd);
 					free(buffer);
 					free(trimmed);
 					exit(0);
@@ -142,7 +129,6 @@ int main(int ac, char **av, char **env)
 						/* but need to determine the */
 						/* conditions */
 
-						free(badcmd);
 						free(trimmed);
 						free(buffer);
 						free(temp);
@@ -177,7 +163,6 @@ int main(int ac, char **av, char **env)
 					execvp(argv[0], argv);
 
 					/* if execvp returns, there was an error */
-					*badcmd = 1;
 					perror("execvp");
 					exit(EXIT_FAILURE);
 				}
@@ -245,7 +230,6 @@ int main(int ac, char **av, char **env)
 		wait(NULL);
 	}
 	
-	free(badcmd);
 	free(buffer);
 	return (0);
 }
