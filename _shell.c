@@ -37,6 +37,7 @@ int main(int ac, char **av, char **env)
 	char **argv = NULL;
 	pid_t pid;
 	char *paths, *validpath = NULL, *errmsg = NULL, *final;
+	struct stat st;
 
 	buffer = malloc(bufsize + 1);
 
@@ -62,45 +63,49 @@ int main(int ac, char **av, char **env)
 			{
 				strcpy(buffer, trimmed);
 
-				path_searched = 0;
-				if (paths != NULL)
+				/* try whatever is echoed first before checking paths  */
+				if (stat(buffer, &st) != 0)
 				{
-					validpath = _exists(paths, buffer);
-					path_searched = 1;
-				}
-
-				if (validpath == NULL)
-				{
-					errmsg = malloc(strlen(av[0]) + strlen(buffer) + 17);
-
-					/* example: ./hsh: 1: ls: not found  */
-					strcpy(errmsg, av[0]);
-					strcat(errmsg, ": ");
-					strcat(errmsg, "1");
-					strcat(errmsg, ": ");
-					strcat(errmsg, buffer);
-					strcat(errmsg, ": not found\n");
-
-					write(2, errmsg, strlen(errmsg));
-
-					if (path_searched == 1)
+					path_searched = 0;
+					if (paths != NULL)
 					{
-						free(validpath);
+						validpath = _exists(paths, buffer);
+						path_searched = 1;
 					}
 
-					free(errmsg);
-					exit(127);
+					if (validpath == NULL)
+					{
+						errmsg = malloc(strlen(av[0]) + strlen(buffer) + 17);
+
+						/* example: ./hsh: 1: ls: not found  */
+						strcpy(errmsg, av[0]);
+						strcat(errmsg, ": ");
+						strcat(errmsg, "1");
+						strcat(errmsg, ": ");
+						strcat(errmsg, buffer);
+						strcat(errmsg, ": not found\n");
+
+						write(2, errmsg, strlen(errmsg));
+
+						if (path_searched == 1)
+						{
+							free(validpath);
+						}
+
+						free(errmsg);
+						exit(127);
+					}
+
+					/* printf("valid path exists!\n"); */
+
+					final = malloc(strlen(validpath) + strlen(buffer) + 2);
+					strcpy(final, validpath);
+					strcat(final, "/");
+					strcat(final, buffer);
+
+					free(buffer);
+					buffer = final;
 				}
-
-				/* printf("valid path exists!\n"); */
-
-				final = malloc(strlen(validpath) + strlen(buffer) + 2);
-				strcpy(final, validpath);
-				strcat(final, "/");
-				strcat(final, buffer);
-
-				free(buffer);
-				buffer = final;
 
 				/* printf("buffer - %s\n", buffer); */
 
