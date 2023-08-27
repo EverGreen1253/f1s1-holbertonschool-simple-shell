@@ -80,6 +80,12 @@ int main(int ac, char **av, char **env)
 						printf("%s\n", env[i]);
 						i++;
 					}
+
+					if (paths != NULL && strlen(paths) > 0)
+					{
+						free(paths);
+					}
+
 					free(buffer);
 					free(trimmed);
 					exit(0);
