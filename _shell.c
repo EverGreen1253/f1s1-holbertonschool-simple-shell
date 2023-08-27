@@ -3,6 +3,8 @@
 #include <stdlib.h>
 #include <string.h>
 #include <sys/wait.h>
+#include <sys/types.h>
+#include <sys/stat.h>
 #include "main.h"
 
 char *buffer;
@@ -27,13 +29,14 @@ void handle_sigint(int signum)
  *
  * Return: Always 0.
  */
-int main(void)
+int main(int ac, char **av, char **env)
 {
-	int count = 0, tty = 1, i = 0;
+	int count = 0, tty = 1, i = 0, path_searched = 0;
 	size_t input = 0;
 	size_t bufsize = 4096;
 	char **argv = NULL;
 	pid_t pid;
+	char *paths, *validpath = NULL, *errmsg = NULL, *final;
 
 	buffer = malloc(bufsize + 1);
 
@@ -41,8 +44,12 @@ int main(void)
 	tty = isatty(STDIN_FILENO);
 
 	/* handle the echo */
-	if (tty == 0)
+	if (tty == 0 && ac == 1 && av[0] != NULL)
 	{
+		/* _setenv(env, "PATH", ""); */
+		paths = _getenv(env, "PATH");
+		/* printf("path - %s\n", paths); */
+
 		while ((input = getline(&buffer, &bufsize, stdin)) < bufsize)
 		{
 			/* printf("Retrieved line of length %lu :\n", input); */
@@ -54,6 +61,48 @@ int main(void)
 			if (trimmed != NULL)
 			{
 				strcpy(buffer, trimmed);
+
+				path_searched = 0;
+				if (paths != NULL)
+				{
+					validpath = _exists(paths, buffer);
+					path_searched = 1;
+				}
+
+				if (validpath == NULL)
+				{
+					errmsg = malloc(strlen(av[0]) + strlen(buffer) + 17);
+
+					/* example: ./hsh: 1: ls: not found  */
+					strcpy(errmsg, av[0]);
+					strcat(errmsg, ": ");
+					strcat(errmsg, "1");
+					strcat(errmsg, ": ");
+					strcat(errmsg, buffer);
+					strcat(errmsg, ": not found\n");
+
+					write(2, errmsg, strlen(errmsg));
+
+					if (path_searched == 1)
+					{
+						free(validpath);
+					}
+
+					free(errmsg);
+					exit(127);
+				}
+
+				/* printf("valid path exists!\n"); */
+
+				final = malloc(strlen(validpath) + strlen(buffer) + 2);
+				strcpy(final, validpath);
+				strcat(final, "/");
+				strcat(final, buffer);
+
+				free(buffer);
+				buffer = final;
+
+				/* printf("buffer - %s\n", buffer); */
 
 				count = count_cmd_line_params(buffer, " ");
 				argv = populate_argv_array(count, buffer, " ");
@@ -140,150 +189,102 @@ int main(void)
 	return (0);
 }
 
-int count_cmd_line_params(char *buffer, char *delim)
+void _setenv(char **env, char *myvar, char *myvalue)
 {
-	char *temp, *token;
-	int count = 0;
-
-	temp = malloc(strlen(buffer) + 1);
-	if (temp == NULL)
-	{
-		free(temp);
-		exit(98);
-	}
-	strcpy(temp, buffer);
-
-	/* we count how many items there are first */
-	token = strtok(temp, delim);
-	while (token != NULL)
-	{
-		count++;
-		token = strtok(NULL, delim);
-	}
-	free(temp);
-
-	/* printf("You typed: %s\n",buffer); */
-	/* printf("count - %d\n", count); */
-
-	return count;
-}
-
-char **populate_argv_array(int count, char *buffer, char *delim)
-{
-	char **argv;
-	char *temp, *token;
 	int i = 0;
+	/* extern char** environ; */
+	char *temp, *final, *token;
 
-	/* let's load up the argv array */
-	argv = malloc(sizeof(char *) * (count + 1));
-	if (argv == NULL)
+	while (env[i] != NULL)
 	{
-		free(argv);
-		exit(98);
+		temp = malloc(strlen(env[i]) + 1);
+		strcpy(temp, env[i]);
+
+		token = strtok(temp, "=");
+		if (strcmp(token, myvar) == 0)
+		{
+			final = malloc(strlen(token) + strlen("=") +  strlen(myvalue) + 1);
+
+			strcpy(final, token);
+			strcat(final, "=");
+			strcat(final, myvalue);
+			env[i] = malloc(strlen(final) + 1);
+
+			env[i] =  final;
+
+			/* j = i; */
+		}
+		i++;
+		free(temp);
 	}
-
-	token = strtok(buffer, delim);
-	while (token != NULL)
-	{
-		temp = malloc(strlen(token) + 1);
-		if (temp == NULL)
-		{
-			free(temp);
-			exit(98);
-		}
-
-		strcpy(temp, token);
-		/* change the newline into a null character */
-		temp[strcspn(temp, "\n")] = '\0';
-
-		if (strlen(temp) != 0)
-		{
-			/* printf("temp - '%s'\n", temp); */
-			argv[i] =  temp;
-
-			i = i + 1;
-		}
-		else
-		{
-			free(temp);
-		}
-
-		token = strtok(NULL, delim);
-	}
-	argv[i] = NULL;
-
-	return argv;
 }
 
-char *strtrim(char *buffer)
+char *_getenv(char **env, char *name)
 {
-	unsigned long len = strlen(buffer), newlen;
-	int startpos = 0, endpos = 0, i, j, stop;
-	char *temp, *trimmed;
+	int i = 0;
+	char *temp, *token;
 
-	temp = malloc(len + 1);
-	strcpy(temp, buffer);
-	temp[strcspn(temp, "\n")] = '\0';
-
-	i = 0;
-	stop = 0;
-	while (temp[i] != '\0' && stop == 0)
+	while (env[i] != NULL)
 	{
-		if (temp[i] != ' ')
+		temp = malloc(strlen(env[i]) + 1);
+		strcpy(temp, env[i]);
+
+		token = strtok(temp, "=");
+		if (strcmp(token, name) == 0)
 		{
-			stop = 1;
+			token = strtok(NULL, "=");
+			return token;
 		}
 
 		i++;
-	}
-	startpos = i - 1;
-
-	if (startpos == (int)(len - 2))
-	{
-		/* entire string is spaces */
 		free(temp);
-		return NULL;
 	}
 
-	i = (int)len;
-	stop = 0;
-	while (stop == 0)
-	{
-		if (temp[i] != ' ' && temp[i] != '\0')
-		{
-			stop = 1;
-		}
-
-		i--;
-	}
-	endpos = i + 1;
-
-	/* printf("len - %lu, startpos - %d, endpos - %d\n", len, startpos, endpos); */
-
-	newlen = endpos - startpos + 2;
-	if (newlen > 0)
-	{
-		/* printf("newlen - %lu\n", newlen); */
-
-		trimmed = malloc(newlen + 1);
-		i = 0;
-		j = 0;
-		while (temp[j] != '\0')
-		{
-			if (j >= startpos && j <= endpos)
-			{
-				trimmed[i] = temp[j];
-				i++;
-			}
-			j++;
-		}
-		trimmed[i] = '\0';
-
-		/* printf("trimmed - %s, i - %d, trimmed length - %lu\n", trimmed, i, strlen(trimmed)); */
-
-		free(temp);
-		return trimmed;
-	}
-	free(temp);
 	return NULL;
+}
+
+char *_exists(char *paths, char *input)
+{
+	char *cmd, *temp = NULL, *path, *pathstemp = NULL, *final = "", *validpath = NULL;
+	struct stat st;
+
+	temp = malloc(strlen(input) + 1);
+	strcpy(temp, input);
+	/* in case the program string passed in has flags */
+	cmd = strtok(temp, " ");
+
+	/* printf("cmd is %s\n", cmd); */
+
+	pathstemp = malloc(strlen(paths) + 1);
+	strcpy(pathstemp, paths);
+
+	path = strtok(pathstemp, ":");
+	while (path != NULL)
+	{
+		/* printf("path is %s\n", path); */
+
+		final = malloc(strlen(path) + strlen(cmd) + 2);
+
+		strcpy(final, path);
+		strcat(final, "/");
+		strcat(final, cmd);
+
+	        if (stat(final, &st) == 0)
+	        {
+			validpath = malloc(strlen(path) + 1);
+			strcpy(validpath, path);
+
+			free(temp);
+			free(pathstemp);
+			free(final);
+        	        return(validpath);
+	        }
+
+		free(final);
+		path = strtok(NULL, ":");
+	}
+
+	free(temp);
+	free(pathstemp);
+	return(NULL);
 }
